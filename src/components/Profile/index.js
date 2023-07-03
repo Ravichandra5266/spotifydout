@@ -1,42 +1,37 @@
-import { useEffect } from 'react'
-
-import Cookies from 'js-cookie'
-
-// import { useState } from 'react'
-
-import Navbar from '../Navbar'
-
 import './index.css'
 
-const Profile = () => {
+import Navbar from '../Navbar'
+import Cookies from 'js-cookie'
 
-// const [profileDate , setProfileData] = useState([])
-
-const getProfileData = async () => {
-    const token = Cookies.get('pa_token')
-    // console.log(token)
-    const url = 'https://api.spotify.com/v1/me'
-    const options = {
-        method:'get',
-        headers:{
-            Authorization:`Bearer ${token}`
-        }
+const Profile = (props) =>{
+    const onclicklogout = () => {
+        Cookies.remove('jwt_token')
+        const {history} = props
+        history.replace('/login')
     }
-    const reqprofileData = await fetch(url ,options)
-    // console.log(reqprofileData)
-    const resProfileData = await reqprofileData.json()
-    // console.log(resProfileData)
-
-}
-
-useEffect(() => {
-getProfileData()
-},[])
     return(
-        <div className='profile-container'>
-       <Navbar/>
-       </div>
-    )
-}
+    <div className='pop'> 
+        <Navbar/>
+        <h1 className='profile-heading'>Account</h1>
+        <hr className='hr' />
+        <div className='profile-details1'>
+            <h1 className='profile-membership'>MemberShip</h1>
+            <div>
+                <h3>Ravichandra@gmail.com</h3>
+                <p>Password:*********</p>
+            </div>
+        </div>
+        <hr className='hr' />
+        <div className='profile-details1'>
+            <h1 className='profile-membership'>Plan Details</h1>
+            <div>
+                <h3>Premium</h3>
+                <p>Ultra Hd</p>
+            </div>
+            </div>
+            <hr className='hr' />
+            <button className='logout' onClick={onclicklogout}>Logout</button>
+    </div>
+)}
 
 export default Profile

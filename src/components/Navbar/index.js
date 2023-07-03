@@ -1,91 +1,180 @@
+import { FaSearch } from "react-icons/fa";
+
 import { GiHamburgerMenu } from "react-icons/gi";
 
-import { NavLink } from "react-router-dom";
+import { Link, NavLink } from "react-router-dom";
 
-import { RiAccountCircleFill } from "react-icons/ri";
-
-import { BiHomeAlt } from "react-icons/bi";
-
-import { ImMusic } from "react-icons/im";
-
-import { MdQueueMusic } from "react-icons/md";
-
-
-import { RxCross1 } from "react-icons/rx";
-
-
-import "./index.css";
 import { useState } from "react";
 
-const Navbar = () =>{ 
-    const [toggetHam , setToggleHam] = useState(false)
+import { AiOutlineCloseCircle } from "react-icons/ai";
 
-    const onclickHam = () => {
-        setToggleHam(p => !p)
-    }
- return(
-	<nav className="nav-container">
-		<div className="nav-head">
-			<img
-				src="https://res.cloudinary.com/dnmaskg3n/image/upload/v1686209648/Vector_1_wokspy.png"
-				alt="nav logo"
-			/>
-			{toggetHam ? <button type="button" className="ham-btn" onClick={onclickHam}>
-				<RxCross1 className="ham-icon" />
-			</button> : <button type="button" className="ham-btn" onClick={onclickHam}>
-				<GiHamburgerMenu className="ham-icon" />
-			</button>}
-		</div>
-		{toggetHam ? <ul className="sm-nav-items">
-			<NavLink to="/profile" exact activeClassName = 'active' className = 'nav-link'>
-				<li>
-					<RiAccountCircleFill className="nav-item-icon" />
-				</li>
-			</NavLink>
-			<NavLink to="/" exact activeClassName = 'active' className = 'nav-link'>
-				<li>
-					<BiHomeAlt className="nav-item-icon" />
-				</li>
-			</NavLink>
-			<NavLink to="/yourmusic" exact activeClassName = 'active' className = 'nav-link'>
-				<li>
-					<ImMusic className="nav-item-icon" />
-				</li>
-			</NavLink>
-			<NavLink to="/playlists" exact activeClassName = 'active' className = 'nav-link'>
-				<li>
-					<MdQueueMusic className="nav-item-icon" />
-				</li>
-			</NavLink>
-		</ul> : ''}
-        <ul className="lg-nav-items">
-			<NavLink to="/profile" exact activeClassName = 'active' className = 'nav-link'>
-				<li>
-					<RiAccountCircleFill className="nav-item-icon" />
-                    <p>Profile</p>
-				</li>
-			</NavLink>
-			<NavLink to="/" exact activeClassName = 'active' className = 'nav-link'>
-				<li>
-					<BiHomeAlt className="nav-item-icon" />
-                    <p>Home</p>
-				</li>
-			</NavLink>
-			<NavLink to="/yourmusic" exact activeClassName = 'active' className = 'nav-link'>
-				<li>
-					<ImMusic className="nav-item-icon" />
-                    <p>Your Music</p>
-				</li>
-			</NavLink>
-			<NavLink to="/playlists" exact activeClassName = 'active' className = 'nav-link'>
-				<li>
-					<MdQueueMusic className="nav-item-icon" />
-                    <p>Playlists</p>
-				</li>
-			</NavLink>
-		</ul>
-	</nav>
-)
- }
+import { CgProfile } from "react-icons/cg";
+
+import SearchContext from "../../Context/SearchContext";
+
+import { useContext } from "react";
+
+import "./index.css";
+
+const Navbar = () => {
+	const [serachIcon, setSearchIcon] = useState(false);
+
+	const { onclickActiveSearchBtn, onchangeSearch } =
+		useContext(SearchContext);
+
+	const [ham, setHam] = useState(false);
+
+	const onclickHam = () => {
+		setHam(!ham);
+	};
+
+	const onclickSearchIcon = () => {
+		setSearchIcon(true);
+	};
+
+	const showSearchResults = () => {
+		onclickActiveSearchBtn(true);
+	};
+
+	const onchangeSearchText = (event) => {
+		onchangeSearch(event.target.value);
+	};
+
+	const onclickSearchOff = () => {
+		onclickActiveSearchBtn(false);
+	};
+	return (
+		<nav className="nav-bg-container">
+			<div className="sm-nav">
+				<div className="sm-flex">
+					<Link
+						to="/"
+						className="nav-logo"
+						onClick={onclickSearchOff}>
+						<h1 className="nav-logo">MOVIES</h1>
+					</Link>
+					<div className="sm-flex">
+						{serachIcon ? (
+							<div className="search-input-container">
+								<input
+									type="search"
+									placeholder="Search Movie"
+									className="search-inputEl"
+									onChange={onchangeSearchText}
+								/>
+
+								<button
+									onClick={showSearchResults}
+									className="nav-search-input-icon">
+									<FaSearch className="search-icons" />
+								</button>
+							</div>
+						) : (
+							<button
+								className="nav-search-icon"
+								onClick={onclickSearchIcon}>
+								<FaSearch className="icons" />
+							</button>
+						)}
+
+						{ham ? (
+							<button
+								className="nav-ham-icon"
+								onClick={onclickHam}>
+								<AiOutlineCloseCircle className="icons" />
+							</button>
+						) : (
+							<button
+								className="nav-ham-icon"
+								onClick={onclickHam}>
+								<GiHamburgerMenu className="icons" />
+							</button>
+						)}
+					</div>
+				</div>
+
+				{ham ? (
+					<ul className="sm-nav-items">
+						<NavLink
+							activclassname="active"
+							exact
+							to="/"
+							onClick={onclickSearchOff}
+							className="nav-link">
+							<li>Home</li>
+						</NavLink>
+
+						<NavLink
+							activclassname="active"
+							exact
+							to="/popular"
+							className="nav-link">
+							<li>Popular</li>
+						</NavLink>
+
+						<NavLink
+							activclassname="active"
+							exact
+							to="/account"
+							className="nav-link">
+							<li>Account</li>
+						</NavLink>
+					</ul>
+				) : (
+					""
+				)}
+			</div>
+
+			<div className="lg-nav">
+				<Link to="/" className="nav-logo" onClick={onclickSearchOff}>
+					<h1 className="nav-logo">MOVIES</h1>
+				</Link>
+				<div className="lg-flex">
+					<div className="lg-nav-items">
+						<NavLink
+							activclassname="lg-active"
+							exact
+							to="/"
+							onClick={onclickSearchOff}
+							className="lg-nav-link">
+							<li>Home</li>
+						</NavLink>
+
+						<NavLink
+							activclassname="lg-active"
+							exact
+							to="/popular"
+							className="lg-nav-link">
+							<li>Popular</li>
+						</NavLink>
+					</div>
+					<div className="lg-search-account">
+						<div className="lg-search-input-container">
+							<input
+								type="search"
+								placeholder="Search Movie"
+								className="search-inputEl"
+								onChange={onchangeSearchText}
+							/>
+
+							<button
+								onClick={showSearchResults}
+								className="nav-search-input-icon">
+								<FaSearch className="search-icons" />
+							</button>
+						</div>
+						<NavLink
+							activclassname="lg-active"
+							exact
+							to="/account"
+							className="lg-nav-link">
+							<CgProfile className="lg-profile-icons" />
+						</NavLink>
+					</div>
+				</div>
+			</div>
+		</nav>
+	);
+};
 
 export default Navbar;

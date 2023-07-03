@@ -1,133 +1,99 @@
-import {Component} from 'react'
-import Cookies from 'js-cookie'
+import { useState } from "react";
 
-import './index.css'
+import Cookies from "js-cookie";
 
-class LoginForm extends Component {
-  componentDidMount() {
-    // NOTE: We wrote this code here because we kept redirect URL as login route, if you give a different route, make sure to move this code to the respective route or App.js
+import { Redirect } from "react-router-dom/cjs/react-router-dom.min";
 
-    const hashKey = this.getHashKeyFromLocationAfterLogin()
+import "./index.css";
 
-    if (hashKey.access_token) {
-      this.postHashKeyAsMessage(hashKey)
-    }
+const LoginPage = (props) => {
+	const [username, setUserName] = useState("");
 
-    this.getMessageAndsetAccessTokenInCookies()
-  }
+	const [password, setPassword] = useState("");
 
-  getHashKeyFromLocationAfterLogin = () => {
-    const {location} = this.props
-    const {hash} = location
-    const hashKey = {}
-    const queryParams = new URLSearchParams(window.location.search)
-    const error = queryParams.get('error')
+	const [errorMsg, setErrorMsg] = useState("");
 
-    if (error === 'access_denied') {
-      window.close()
-    }
+	const [isFormSubmitted, setIsFormSubmitted] = useState(false);
 
-    hash
-      .replace(/^#\/?/, '')
-      .split('&')
-      .forEach(keyValue => {
-        const spl = keyValue.indexOf('=')
-        if (spl !== -1) {
-          hashKey[keyValue.substring(0, spl)] = keyValue.substring(spl + 1)
-        }
-      })
-    return hashKey
-  }
+	const onchangeUserid = (event) => {
+		setUserName(event.target.value);
+	};
 
-  postHashKeyAsMessage = hashKey => {
-    window.opener.postMessage(
-      JSON.stringify({
-        type: 'access_token',
-        access_token: hashKey.access_token,
-        expires_in: hashKey.expires_in || 0,
-      }),
-      '*',
-    )
-    window.close()
-  }
+	const onchangePassword = (event) => {
+		setPassword(event.target.value);
+	};
 
-  getMessageAndsetAccessTokenInCookies = () => {
-    window.addEventListener(
-      'message',
-      event => {
-        const hash = (event.data)
-        if (hash.type === 'access_token') {
-          const oneHour = new Date(new Date().getTime() + 60 * 60 * 1000)
-          Cookies.set('pa_token', hash.access_token, {
-            expires: oneHour,
-          })
-          window.location.replace('/')
-        }
-      },
-      false,
-    )
-  }
+	const onsubmitForm = async (event) => {
+		event.preventDefault();
+		const url = "https://apis.ccbp.in/login";
 
-  isDevelopmentEnvironment = () => {
-    if (
-      process.env.NODE_ENV === 'development' ||
-      window.location.hostname === 'localhost'
-    ) {
-      return true
-    }
-    return false
-  }
+		const options = {
+			method: "POST",
+			body: JSON.stringify({
+				username,
+				password,
+			}),
+		};
 
-  getRedirectURL = () => {
-    if (this.isDevelopmentEnvironment()) {
-      /* ADD THIS URL to your Application Redirect URIs to redirect after authentication success OR failure */
-      return 'http://localhost:3000/'
-    }
-    /* Change this redirectURL accordingly before publishing your project and ADD THIS URL to your Application Redirect URIs to redirect after authentication success OR failure */
-    return 'http://localhost:3000/login'
-  }
 
-  openLoginModal = () => {
-    // YOU NEED TO ADD YOUR CLIENT ID HERE
-    const clientId = "4aa381ecc94a4bb783909f2deb1a6fd3"
+		const req = await fetch(url, options);
 
-    const redirectUrl = this.getRedirectURL()
 
-    const url = `https://accounts.spotify.com/authorize?client_id=${clientId}&response_type=token&redirect_uri=${redirectUrl}&scope=user-read-private%20user-read-email%20playlist-read-private%20playlist-modify-public%20playlist-modify-private%20user-library-read%20user-library-modify%20user-follow-read%20user-follow-modify&state=34fFs29kd09&show_dialog=true`
+		const res = await req.json();
 
-    const width = 450
-    const height = 730
-    const left = window.innerWidth / 2 - width / 2
-    const top = window.innerHeight / 2 - height / 2
+		if (req.ok) {
+			Cookies.set("jwt_token", res.jwt_token, { expires: 30 });
+      const {history} = props
+     history.replace('/')
+		} else {
+			setErrorMsg(res.error_msg);
+			setIsFormSubmitted(true);
 
-    window.open(
-      url,
-      'Spotify',
-      `menubar=no,location=no,resizable=no,scrollbars=no,status=no, width=${width}, height = ${height}, top = ${top}, left = ${left}`,
-    )
-  }
+		}
+	};
 
-  submitForm = async event => {
-    event.preventDefault()
-    this.openLoginModal()
-  }
+	const token = Cookies.get('jwt_token')
 
-  render() {
-    return (
-      <div className="login-form-container">
-        <form className="form-container" onSubmit={this.submitForm}>
-          <img
-            src="https://assets.ccbp.in/frontend/react-js/spotify-remix-login-music.png"
-            className="login-website-logo-desktop-image"
-            alt="website logo"
-          />
-          <button type="submit" className="login-button">
-            LOG IN SPOTIFY REMIX
-          </button>
-        </form>
-      </div>
-    )
-  }
-}
+	if(token !== undefined){
+		return <Redirect to = '/'/>
+	}
 
-export default LoginForm
+	return (
+		<div className="login-bg-container">
+			<div className="login-container">
+				<h1 className="login-logo-name">MOVIES</h1>
+				<form onSubmit={onsubmitForm} className="login-form">
+					<h1 className="login-form-logo">Login</h1>
+					<label htmlFor="userid" className="login-labels">
+						UserName
+					</label>
+					<input
+						type="text"
+						placeholder="Username"
+						id="userid"
+						className="login-inputs"
+						onChange={onchangeUserid}
+					/>
+					<label htmlFor="password" className="login-labels">
+						Password
+					</label>
+					<input
+						type="password"
+						placeholder="Password"
+						id="password"
+						className="login-inputs"
+						onChange={onchangePassword}
+					/>
+
+					{isFormSubmitted ? <p className="error-msg">{errorMsg}</p> : ""}
+
+					<button type="submit" className="login-form-btn">
+						Login
+					</button>
+				</form>
+			</div>
+		</div>
+	);
+};
+
+export default LoginPage;
